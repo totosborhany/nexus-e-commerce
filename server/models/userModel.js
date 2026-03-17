@@ -114,7 +114,7 @@ userSchema.methods.createResetToken = async function () {
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
-  this.PasswordResetExpires = Date.now() + 10 * 60 * 1000;
+  this.passwordResetExpires  = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
 };

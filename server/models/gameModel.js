@@ -44,6 +44,9 @@ const gameSchema = mongoose.Schema({
   photo:{
     type:String
   },
+  images:{
+    type:[String]
+  },
   desPhotos:
   {
     type:[String]

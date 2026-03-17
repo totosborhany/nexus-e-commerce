@@ -4,5 +4,6 @@ const cartController = require("../controllers/cartController");
 const authController = require("../controllers/authController");
 
 router.get("/",authController.protected,cartController.getCart);
+router.delete("/",authController.protected,cartController.clearCart);
 router.route("/:gameId").post(authController.protected,cartController.addToCart).delete(authController.protected,cartController.removeFromCart);
 module.exports = router;

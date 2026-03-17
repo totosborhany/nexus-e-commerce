@@ -29,7 +29,7 @@ exports.resizeGameImages = catchAsync(async (req, res, next) => {
   console.log("Cover image saved to:", path.join(__dirname, '../uploads/games/cover', req.body.photo));
     }
   if (req.files.images && req.files.images.length > 0) {
-    req.body.images = [];
+    req.body.desPhotos = [];
     await Promise.all(
       req.files.images.map(async (el, i) => {
         const filename = `game-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
@@ -38,7 +38,7 @@ exports.resizeGameImages = catchAsync(async (req, res, next) => {
           .jpeg({ quality: 90 })
           .resize(2000, 2000)
           .toFile(path.join(__dirname, '../uploads/games/description', filename));
-        req.body.images.push(filename);
+        req.body.desPhotos.push(filename);
       }),
     );
   }
@@ -64,15 +64,16 @@ exports.getGames = catchAsync(async (req, res, next) => {
     filter.$or = [
       { name: { $regex: search, $options: "i" } },
       { description: { $regex: search, $options: "i" } },
-      { genre: { $regex: search, $options: "i" } },
+      { genre: { $elemMatch: { $regex: search, $options: "i" } } },
     ];
     // delete search so ApiFeatures doesn't try to use it as a field
     delete req.query.search;
   }
 
-  // support genre filter directly
+  // support genre filter directly (genre is an array, use $in operator)
   if (req.query.genre) {
-    filter.genre = req.query.genre;
+    const genres = Array.isArray(req.query.genre) ? req.query.genre : [req.query.genre];
+    filter.genre = { $in: genres };
     delete req.query.genre;
   }
 

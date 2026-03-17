@@ -30,6 +30,11 @@ const assignCookie = (res, statusCode, user, message) => {
   });
 };
 exports.signup = catchAsync(async (req, res, next) => {
+  const exist  = await User.findOne({email:req.body.email});
+ if(exist){
+   return next(new appError("user with this email already exists", 400));
+ }
+
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
@@ -96,6 +101,7 @@ exports.logout = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     message: "successfully logged out",
+    token
   });
 });
 exports.authorizedTo = (...roles) => (req, res, next) => {
@@ -182,8 +188,10 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   }
   const token = await user.createResetToken();
   await user.save({ validateBeforeSave: false });
+  console.log(token);
 
-  const url = `${req.protocol}://${req.get("host")}/reset-password/${token}`;
+  // const url = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+  const url = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   const messageText = `this is your reset token its only valid for 10 mins ${url}`;
 
   const sendemail = new Email(url, messageText, user);
@@ -191,15 +199,18 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     message: "token sent",
+    token
   });
 });
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  const { token } = req.params;
+ const { token, password, passwordConfirm } = req.body;
+  if (!token) return next(new appError("Token missing", 400));  console.log(token);
   const hashedToken = await crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-
+  .createHash("sha256")
+  .update(token)
+  .digest("hex");
+  
+  console.log(hashedToken,token) ;
   const user = await User.findOne({
     passwordResetToken: hashedToken,
     passwordResetExpires: { $gte: Date.now() },
@@ -209,8 +220,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     return next(new appError("sorry user not found the token is wrong", 404));
   }
 
-  user.password = req.body.password;
-  user.passwordConfirm = req.body.passwordConfirm;
+  user.password =password;
+  user.passwordConfirm = passwordConfirm;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();

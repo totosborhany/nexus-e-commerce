@@ -18,7 +18,7 @@ router.route("/login").post(authoController.login);
 router.get("/logout", authoController.logout);
 router.post("/signup", authoController.signup);
 router.post("/forgot-password", authoController.forgetPassword);
-router.patch("/reset-password/:token", authoController.resetPassword);
+router.patch("/reset-password", authoController.resetPassword);
 router.use(authoController.protected);
 router.patch(
   "/update-me",
@@ -36,12 +36,24 @@ router.patch(
 router.route("/me").get(authoController.protected, userController.getMe);
 router.route("/reviews").get(authoController.protected,userController.getUserReviews);
 router.route("/bookings").get(authoController.protected,userController.getUserBookings);
-router
-  .route("/")
+router.route("/")
   .get(
     authoController.protected,
     authoController.authorizedTo("admin"),
     userController.getUsers,
+  );
+  // .delete(
+  //   authoController.protected,
+  //   authoController.authorizedTo("admin"),
+  //   userController.deleteUser,
+  // );
+
+router
+  .route("/:id")
+  .delete(
+    authoController.protected,
+    authoController.authorizedTo("admin"),
+    userController.deleteUserById,
   );
 
 module.exports = router;

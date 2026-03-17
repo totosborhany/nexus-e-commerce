@@ -5,18 +5,31 @@ class Email {
     this.message = message;
     this.from = `Nexus  <${process.env.EMAIL_USERNAME}>`;
     this.to = user.email;
-    this.firstname = user.name.split(" ")[0];
-  }
+this.firstname = user.name?.split(" ")[0] || "User";  }
 
+  // createTransport() {
+  //   return nodemailer.createTransport({
+  //     service: "gmail",
+  //     auth: {
+  //       user: process.env.EMAIL_USERNAME,
+  //       pass: process.env.EMAIL_PASSWORD,
+  //     },
+  //   });
+  // }
   createTransport() {
-    return nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
-  }
+  return nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+}
  async  send(subject){
     try{
 

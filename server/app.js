@@ -44,34 +44,30 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // <-- MUST be true if frontend sends cookies
+    credentials: true, 
   }),
 );
-// app.use(cors({ origin: "http://localhost:8081" }));
-// app.use(cors({origin: "http://127.0.0.1:8081"}));
-// app.options('/*', cors());
 
-// Static file serving - FIXED to serve all upload directories
-// Game cover images
-app.use(
-  "/uploads/games/cover",
-  express.static(path.join(__dirname, "uploads/games/cover")),
-);
-// Game description images
-app.use(
-  "/uploads/games/description",
-  express.static(path.join(__dirname, "uploads/games/description")),
-);
-// User profile photos
-app.use(
-  "/uploads/users",
-  express.static(path.join(__dirname, "uploads/users")),
-);
-// Fallback for /uploads requests (game cover)
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "uploads/games/cover")),
-);
+const addCorsHeaders = (req, res, next) => {
+  const origin = req.headers.origin || "*";
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+};
+
+// 1. Specific subfolders first
+app.use("/uploads/users", addCorsHeaders, express.static(path.join(__dirname, "uploads/users")));
+app.use("/uploads/games/cover", addCorsHeaders, express.static(path.join(__dirname, "uploads/games/cover")));
+app.use("/uploads/games/description", addCorsHeaders, express.static(path.join(__dirname, "uploads/games/description")));
+
+// 2. Fix the "root" /uploads request to look in the users folder too
+app.use("/uploads", addCorsHeaders, express.static(path.join(__dirname, "uploads/users")));
+
+// 3. Keep your fallback for games if needed
+app.use("/uploads", addCorsHeaders, express.static(path.join(__dirname, "uploads/games/cover")));
+app.use("/uploads", addCorsHeaders, express.static(path.join(__dirname, "uploads/games/description")));
+
 
 app.use(helmet());
 app.use(hpp());

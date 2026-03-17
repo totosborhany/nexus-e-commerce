@@ -1,11 +1,14 @@
 const AppError = require('../utills/appError');
-const stripe = require('stripe')(process.env.STRIPE);
 const Booking = require('../models/bookingModel');
+let stripe;
 const factory = require('./handlerFactory');
 const catchAsync = require('../utills/catchAsync');
 const Cart = require("../models/cartModel");
 
 exports.getCheckoutSession = catchAsync(async (req, res) => {
+  // Initialize stripe on first use
+  if (!stripe) stripe = require('stripe')(process.env.STRIPE);
+  
   // 1️⃣ Get user's cart and populate game details
   const cart = await Cart.findOne({ user: req.user.id }).populate('games');
 
@@ -74,6 +77,9 @@ exports.getCheckoutSession = catchAsync(async (req, res) => {
 });
 
 exports.webhookCheckout = async (req, res) => {
+  // Initialize stripe on first use
+  if (!stripe) stripe = require('stripe')(process.env.STRIPE);
+  
   const signature = req.headers['stripe-signature'];
 
   let event;
