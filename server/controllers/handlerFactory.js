@@ -3,6 +3,7 @@ const AppError = require("../utills/appError");
 const ApiFeatures = require("../utills/apiFeatures");
 
 exports.getAll = (model, popOptions) =>
+  
   catchAsync(async (req, res, next) => {
     // build query
     const features = new ApiFeatures(model.find(), req.query)
@@ -15,14 +16,11 @@ exports.getAll = (model, popOptions) =>
     // execute query
     const results = await features.query;
 
-    if (!results || results.length === 0) {
-      return next(new AppError("Could not find any documents", 400));
-    }
-
+    // Return empty array instead of error when no results
     res.status(200).json({
       status: "success",
       results: results.length,
-      data: results,
+      data: results || [],  // Always return array, never undefined
     });
   });
 
@@ -36,7 +34,7 @@ exports.getOne = (model, popOptions) =>
     if (!result) {
       return next(new AppError("Document not found", 400));
     }
-
+console.log("Result:", result);
     res.status(200).json({
       status: "success",
       data: result,

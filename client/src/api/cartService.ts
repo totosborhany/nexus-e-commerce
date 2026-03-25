@@ -19,8 +19,8 @@ export const cartService = {
   getCart: async (): Promise<Game[]> => {
     try {
       const res = await client.get('/cart');
-      // API response format: { status, data: { cart: { games: [...] } } }
-      return res.data.data?.cart?.games || [];
+      // Backend returns: { status: "success", data: [] } (array of games)
+      return Array.isArray(res.data.data) ? res.data.data : [];
     } catch (error: any) {
       console.error('Error fetching cart:', error);
       return [];
@@ -47,8 +47,6 @@ export const cartService = {
 
   clearCart: async (): Promise<void> => {
     try {
-      // Note: Ensure the backend supports DELETE /cart
-      // If not supported, this endpoint may need to be implemented
       await client.delete('/cart');
     } catch (error: any) {
       throw new Error(extractErrorMessage(error));

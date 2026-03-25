@@ -42,16 +42,17 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  await newUser.createVerification();
-   await newUser.save({ validateBeforeSave: false });
-   const veremail = new Email("", `your verification code is: ${newUser.verifier}`, newUser);
-  await veremail.send("verification code");
-   res.send("verification code sent to email");
+  // await newUser.createVerification();
+  //  await newUser.save({ validateBeforeSave: false });
+  //  const veremail = new Email("", `your verification code is: ${newUser.verifier}`, newUser);
+  // await veremail.send("verification code");
+  //  res.send("verification code sent to email");
    
-  // assigncookies(res, 201, newUser, "user created successfully");
+  assigncookies(res, 201, newUser, "user created successfully");
 });
 
 exports.login = catchAsync(async (req, res, next) => {
+  
   const { email, password } = req.body;
   if (!email || !password) {
     return next(new appError("please provide email and password", 400));
@@ -65,10 +66,10 @@ exports.login = catchAsync(async (req, res, next) => {
   ) {
     return next(new appError("sorry  invalid credentials", 404));
   }
-   await user.createVerification();
-   await user.save({ validateBeforeSave: false });
-   const veremail = new Email("", `your verification code is: ${user.verifier}`, user);
-     await veremail.send("verification code");
+  //  await user.createVerification();
+  //  await user.save({ validateBeforeSave: false });
+  //  const veremail = new Email("", `your verification code is: ${user.verifier}`, user);
+  //    await veremail.send("verification code");
 
   //  res.send("verification code sent to email");
      
@@ -117,11 +118,11 @@ exports.protected = catchAsync(async (req, res, next) => {
   let decoded;
   if (
     req.headers.authorization 
-   || req.headers.authorization.startsWith("Bearer")
+   && req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization?.split(" ")[1];
-  } else if (req.cookie.jwt) {
-    token = req.cookie.jwt;
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   } else {
     return next(new AppError("please log in", 401));
   }

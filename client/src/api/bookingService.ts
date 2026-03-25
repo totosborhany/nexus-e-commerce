@@ -17,7 +17,7 @@ export interface CheckoutSession {
 
 export interface Booking {
   _id: string;
-  game: Array<{ _id: string; name: string }> | Game[];
+  games: Array<{ _id: string; name: string }> | Game[];
   user: string;
   price: number;
   paid: boolean;
@@ -34,8 +34,10 @@ export const bookingService = {
   createCheckoutSession: async (): Promise<CheckoutSession> => {
     try {
       const res = await client.post('/bookings/checkout-session');
+      console.log('Checkout session response:', res);
       return res.data.session || {};
     } catch (error: any) {
+      console.error('Checkout session error:', error);
       throw new Error(extractErrorMessage(error));
     }
   },
@@ -43,6 +45,7 @@ export const bookingService = {
   getBookings: async (): Promise<Booking[]> => {
     try {
       const res = await client.get('/bookings');
+      console.log('Bookings response:', res);
       return res.data.data || [];
     } catch (error: any) {
       console.error('Error fetching bookings:', error);
@@ -53,7 +56,7 @@ export const bookingService = {
   createBooking: async (gameIds: string[], price: number): Promise<Booking> => {
     try {
       const res = await client.post('/bookings', {
-        game: gameIds,
+        games: gameIds,
         price,
       });
       return res.data.data;

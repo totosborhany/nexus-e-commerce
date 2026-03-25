@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bookingSchema = new mongoose.Schema({
-  game:[ {
+  games:[ {
     type:mongoose.Schema.ObjectId
     ,
     ref:'Game',
@@ -16,22 +16,22 @@ const bookingSchema = new mongoose.Schema({
     required:true,
 
   },
-  CreatedAt:{
+  CreatedAt :{
     type:Date,
-    default:Date.now()
+    default:Date.now
   },
   paid:{
 type:Boolean,
-default:true
+default:false
   }
 
 });
-bookingSchema.pre(/^find/,function(){
-  this.populate('user').populate({
-    path:'game',
-    select:'name'
-  });
-});
+// bookingSchema.pre(/^find/,function(){
+//   this.populate('user').populate({
+//     path:'games',
+//     select:'name'
+//   });
+// });
 const Booking = mongoose.model('Booking',bookingSchema);
 
 module.exports = Booking;

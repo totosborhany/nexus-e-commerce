@@ -18,6 +18,15 @@ const viewRoute = require("./routes/viewRoutes");
 const bookingRoute = require('./routes/bookingRoutes');
 const app = express();
 
+// 🔥 CRITICAL: Webhook must handle raw JSON for Stripe signature validation
+// This MUST come before express.json() middleware and rate limiting
+app.post('/api/nexus/bookings/webhook',
+  express.raw({ type: 'application/json' }),
+  require('./controllers/bookingController').webhookCheckout
+);
+
+// Now apply JSON parsing for all other routes
+app.use(express.json({limit:"10kb"}));
 app.use(morgan("dev"));
 app.use(
   "/api",
@@ -27,7 +36,6 @@ app.use(
     windowMs: 60 * 60 * 1000,
   }),
 );
-app.use(express.json({ limit: "10kb" }));
 const allowedOrigins = [
   "http://localhost:8081",
   "http://127.0.0.1:8081",
